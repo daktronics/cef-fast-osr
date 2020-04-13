@@ -412,7 +412,8 @@ private:
 class WebView : public CefClient,
 	public CefRenderHandler,
 	public CefLifeSpanHandler,
-	public CefLoadHandler
+	public CefLoadHandler,
+	public CefRequestHandler
 {
 public:
 	WebView(
@@ -479,6 +480,10 @@ public:
 	}
 
 	CefRefPtr<CefLoadHandler> GetLoadHandler() override {
+		return this;
+	}
+
+	CefRefPtr<CefRequestHandler> GetRequestHandler() override {
 		return this;
 	}
 
@@ -665,7 +670,7 @@ public:
 		CefRefPtr<CefFrame> frame,
 		const CefString& target_url,
 		const CefString& target_frame_name,
-		WindowOpenDisposition target_disposition,
+		CefLifeSpanHandler::WindowOpenDisposition target_disposition,
 		bool user_gesture,
 		const CefPopupFeatures& popup_features,
 		CefWindowInfo& window_info,
@@ -874,6 +879,12 @@ public:
 			mouse.modifiers = 0;
 			browser->GetHost()->SendMouseMoveEvent(mouse, leave);
 		}
+	}
+
+	virtual void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
+		TerminationStatus status) override
+	{
+		browser->Reload();
 	}
 
 private:
